@@ -114,6 +114,11 @@ def add_author():
         name = request.form['name']
         country = request.form.get('country', '')
 
+        # Validate that name contains no numbers
+        if any(char.isdigit() for char in name):
+            flash('Error: Author name cannot contain numbers!', 'danger')
+            return render_template('add-author.html')
+
         conn = get_db_connection()
         with conn.cursor() as cursor:
 
@@ -158,6 +163,15 @@ def edit_author(id):
     if request.method == 'POST':
         name = request.form['name']
         country = request.form.get('country', '')
+
+        # Validate that name contains no numbers
+        if any(char.isdigit() for char in name):
+            flash('Error: Author name cannot contain numbers!', 'danger')
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT * FROM author WHERE author_id = %s', (id,))
+                author = cursor.fetchone()
+            conn.close()
+            return render_template('edit_author.html', author=author)
 
         with conn.cursor() as cursor:
             cursor.execute('SELECT image FROM author WHERE author_id = %s', (id,))
